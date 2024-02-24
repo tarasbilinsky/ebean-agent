@@ -7,12 +7,8 @@ import io.ebean.enhance.asm.Opcodes;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 import static io.ebean.enhance.Transformer.EBEAN_ASM_VERSION;
 
@@ -56,7 +52,9 @@ public class ClassWriterWithoutClassLoading extends ClassWriter {
   * @return the internal name of the common super class of the two given classes.
   */
   @Override
-  protected String getCommonSuperClass(final String type1, final String type2) {
+  protected String getCommonSuperClass(final String type1p, final String type2p) {
+    String type1 = type1p.replace('/', '.');
+    String type2 = type2p.replace('/', '.');
     try {
       if (getInstanceOfs(type2).contains(type1)) {
         return type1;
@@ -74,7 +72,8 @@ public class ClassWriterWithoutClassLoading extends ClassWriter {
         return type;
       }
     } catch (Exception e) {
-      unresolved.add(new CommonSuperUnresolved(type1, type2, e.toString()));
+      String res = Arrays.stream(e.getStackTrace()).map(x -> x.toString()).reduce((a, b) -> a + "\n" + b).get();
+      unresolved.add(new CommonSuperUnresolved(type1, type2, e.toString()+ " " + res));
       return "java/lang/Object";
     }
   }

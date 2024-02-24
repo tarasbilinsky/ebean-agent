@@ -154,6 +154,8 @@ public final class EnhanceContext {
   }
 
   public byte[] classBytes(String className, ClassLoader classLoader) {
+    byte[] res = classBytesReader.getClassBytes(className.replace('/', '.'), classLoader);
+    if (res!=null) return res;
     return classBytesReader.getClassBytes(className, classLoader);
   }
 
