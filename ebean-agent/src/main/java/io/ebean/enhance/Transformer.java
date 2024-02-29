@@ -177,9 +177,9 @@ public class Transformer implements ClassFileTransformer {
       if (enhanceContext.detectEntityTransactionalEnhancement(className)) {
         enhanceEntityAndTransactional(loader, request);
       }
-//      if (enhanceContext.detectQueryBeanEnhancement(className)) {
-//        enhanceQueryBean(loader, request);
-//      }
+      if (enhanceContext.detectQueryBeanEnhancement(className)) {
+        enhanceQueryBean(loader, request);
+      }
       if (request.isEnhanced()) {
         return request.getBytes();
       }
@@ -223,13 +223,13 @@ public class Transformer implements ClassFileTransformer {
           entityEnhancement(loader, request);
         }
       }
-//      if (enhanceContext.isEnableProfileLocation() || detect.isTransactional()) {
-//        if (detect.isEnhancedTransactional()) {
-//          detect.log(3, "already enhanced transactional");
-//        } else {
-//          transactionalEnhancement(loader, request);
-//        }
-//      }
+      if (enhanceContext.isEnableProfileLocation() || detect.isTransactional()) {
+        if (detect.isEnhancedTransactional()) {
+          detect.log(3, "already enhanced transactional");
+        } else {
+          transactionalEnhancement(loader, request);
+        }
+      }
     } catch (NoEnhancementRequiredException e) {
       log(8, request.getClassName(), "No entity or transactional enhancement required " + e.getMessage());
     }

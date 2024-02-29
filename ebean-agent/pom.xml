@@ -29,6 +29,14 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>play</artifactId>
+      <version>1.7</version>
+      <scope>system</scope>
+      <systemPath>/Users/taras/Projects/HEA/hea-one/code/libraries/play-1-7/framework/play-1.7.x-1.7.1-74-gf832ef82.jar</systemPath>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.ant</groupId>
       <artifactId>ant</artifactId>
       <version>1.10.11</version>

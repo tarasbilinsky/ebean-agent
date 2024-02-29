@@ -44,53 +44,40 @@ public class ClassWriterWithoutClassLoading extends ClassWriter {
     return unresolved;
   }
 
-  /**
-  * Returns the common super type of the two given types.
-  *
-  * @param type1 the internal name of a class.
-  * @param type2 the internal name of another class.
-  * @return the internal name of the common super class of the two given classes.
-  */
-  @Override
-  protected String getCommonSuperClass(final String type1p, final String type2p) {
-    String type1 = type1p.replace('/', '.');
-    String type2 = type2p.replace('/', '.');
-    try {
-      if (getInstanceOfs(type2).contains(type1)) {
-        return type1;
-      }
-      if (getInstanceOfs(type1).contains(type2)) {
-        return type2;
-      }
-      if (isInterface(type1) || isInterface(type2)) {
-        return "java/lang/Object";
-      } else {
-        String type = type1;
-        do {
-          type = getSuperclass(type);
-        } while (!getInstanceOfs(type2).contains(type));
-        return type;
-      }
-    } catch (Exception e) {
-      String res = Arrays.stream(e.getStackTrace()).map(x -> x.toString()).reduce((a, b) -> a + "\n" + b).get();
-      unresolved.add(new CommonSuperUnresolved(type1, type2, e.toString()+ " " + res));
-      return "java/lang/Object";
-    }
-  }
 
-  private String getSuperclass(String type) {
-    if (!type2superclass.containsKey(type)) {
-      initializeTypeHierarchyFor(type);
+  protected String getCommonSuperClass(String type1, String type2)
+    {
+        try {
+            // First put all super classes of type1, including type1 (starting with type2 is equivalent)
+            Set<String> superTypes1 = new HashSet<String>();
+            String s = type1;
+            superTypes1.add(s);
+            while (!"java/lang/Object".equals(s)) {
+                s = getSuperType(s);
+                superTypes1.add(s);
+            }
+            // Then check type2 and each of it's super classes in sequence if it is in the set
+            // First match is the common superclass.
+            s = type2;
+            while (true) {
+                if (superTypes1.contains(s)) return s;
+                s = getSuperType(s);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.toString());
+        }
     }
-    return type2superclass.get(type);
-  }
 
-  private boolean isInterface(String type) {
-    if (!type2isInterface.containsKey(type)) {
-      initializeTypeHierarchyFor(type);
+    private String getSuperType(String type) throws ClassNotFoundException
+    {
+      play.classloading.ApplicationClasses.ApplicationClass ac = play.Play.classes.getApplicationClass(type.replace('/', '.'));
+        try {
+            return ac != null ? new ClassReader(ac.enhancedByteCode).getSuperName() : new ClassReader(type).getSuperName();
+        } catch (IOException e) {
+            throw new ClassNotFoundException(type);
+        }
     }
-    return type2isInterface.get(type);
-  }
+
 
   private Set<String> getInstanceOfs(String type) {
     if (!type2instanceOfs.containsKey(type)) {
